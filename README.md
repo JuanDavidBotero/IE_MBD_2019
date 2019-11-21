@@ -34,13 +34,11 @@ Kaggle:
 
 Python and R codes for Kaggle and other Data Science Competitions.
 
-City Bikes Demand (2nd place): Forecasting bike sharing demand RMSLE 0.22794.
-House Prices (10th place): Advanced Regression Techniques competition. Final score of 0.12788.
-Pump it Pump: Advanced Modelling (Random Forest) for the Pump it up challenge on Driven Data. Final score of 0.79.
+a) City Bikes Demand (2nd place): Forecasting bike sharing demand RMSLE 0.22794.
+b) House Prices (10th place): Advanced Regression Techniques competition. Final score of 0.12788.
+c) Pump it Pump: Advanced Modelling (Random Forest) for the Pump it up challenge on Driven Data. Final score of 0.79.
 
 Machine Learning: 
-
-Contains three sections:
 
 Clustering: A report on a clustering project carried out in Dataiku.
 
