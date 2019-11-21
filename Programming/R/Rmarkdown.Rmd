@@ -1,0 +1,283 @@
+---
+title: "Programming R Group C Assignment"
+author: "MBD-A1-Group C"
+date: "21 July 2019"
+output: 
+  html_document:
+    fig_caption: yes
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    fig_caption: yes
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE);
+library(data.table);
+library(ggplot2);
+library(leaflet);
+library(lubridate);
+library(mice);
+library(reshape2);
+library(outliers);
+library(cluster);
+library(dplyr);
+library(ggcorrplot);
+library(factoextra);
+library(cluster);
+library(kableExtra);
+
+
+### 1st data set with all the target variables
+solar_data<-readRDS("solar_dataset.RData")
+target_data<- solar_data[,c(1:99)] ###splitting the 98 target variables from the PCA ones
+target_train_data<-target_data[c(1:5113),] ##### splitting the target_data into test and train 
+target_test_data<-target_data[-c(1:5113)]
+pca_data<-solar_data[,-c(2:99)] #### splitting all the PCA from the target 
+#pca_train_data<- pca_data[c(1:5113)]
+
+#### 2nd data set information about the location of the stations
+station_info<-read.csv("station_info.csv")
+
+#### 3rd data set additional variables (this data set to be used for EDA )
+additional_variables<-readRDS("additional_variables.RData")
+
+additional_variables[,1]
+
+class(additional_variables$Date)  ### character to be converted into date 
+class(ymd(additional_variables$Date)) ##### using the ymd function from the lubridate package
+additional_variables$Date<-ymd(additional_variables$Date)
+class(additional_variables$Date)
+
+completedData <- fread("completedData.csv");
+
+```
+
+![](iehstlogo.png) ![](R_logo.svg.png)
+
+# 1. Project Description
+
+
+This project involves the use of historical data, ranging from *1994-01-01 until 2007-12-31, for 98 solar power plants* to **predict the generated power from 2008-01-01 until 2012-11-30**. The main dataset contains a row for each day in that period, the power generation for each of the power plants, and **357 columns** which are derived from running principle component analysis on roughly 10,000 variables that can influence the power generation. Two additional data sets are also provided to augment this dataset. The first of these additional data sets houses the information regarding the individual power plants, with the longitudes and latitudes being given along with the elevation. The final dataset contains 100 additional variables corresponding to real numerical weather predictions for each of the days.
+
+Using all of this information, this document will highlight the exploratory data analysis process utilized in order to prepare this dataset for a prediction model for the values of interest. This process includes three major components which will be outlined below. The first is the cleaning of the datasets to ensure the usability of this dataset in the following steps. The second is the preliminary exploration of the data, where basic analysis of the dataset will be conducted to establish relationships between the variables. And finally, the advanced exploration that will highlight deeper relations between the myriad of variables available. 
+
+***
+
+# 2. Data Cleaning
+## 2.1 State of the Data
+### 2.1.1 Missing Values
+
+In the main dataset, there are no missing values in the data for the historical portion. The following code outputs the  the number of NA values in each of the columns of the dataset.
+
+```{r missing_values_main, echo=FALSE, include=TRUE, eval=TRUE}
+
+x <- sapply(solar_data,function(x){sum(is.na(x))});
+df_x <- data.frame(x)
+knitr::kable(df_x,format = "html", col.names = c("Number of Missing Data Points"), row.names = TRUE) %>%
+kable_styling(bootstrap_options = c("striped"),
+                full_width = T,
+                font_size = 15) %>% scroll_box(height = "300px")
+
+```
+
+The 1796 missing data points for the 98 columns of the power plants are the ones that are to be predicted. Hence, it can be concluded that there is no missing data in this particular dataset. 
+
+
+On the other hand, in the additional variables dataset, all of the variables, bar the date column, have missing data points. The table below shows the percentage of missing data for each of the variables.
+
+
+```{r missing_values_additional_variables, echo=FALSE, eval=TRUE}
+y <- sapply(additional_variables,function(x){round(sum(is.na(x))/length(x)*100,3)});
+df_y <- data.frame(y)
+knitr::kable(df_y,format = "html", col.names = c("Percentage of Missing Data Points"), row.names = TRUE) %>%
+kable_styling(bootstrap_options = c("striped"),
+                full_width = T,
+                font_size = 15) %>% scroll_box(height = "300px")
+```
+
+### 2.1.2 Outliers
+
+Outliers are another source of potential issues when it comes to any dataset. To identify the outliers in this data set the inter-quartile range (IQR) was determined for each feature available. Then, using the standard procedure of creating a range that covers 1.5xIQR in either direction. The following table shows the number of outliers in each of the non-PCA features.
+
+```{r outliers, echo=FALSE, eval=TRUE, include=TRUE}
+completedData_2 <- completedData[,-c(1,2)]
+z <- sapply(completedData_2,function(x){IQR <- quantile(x,0.75) - quantile(x,0.25); outliers <- sum(((x > 1.5*IQR + quantile(x, 0.75)) | (x < quantile(x,0.25)-1.5*IQR))); return(outliers)});
+df_z <- data.frame(z)
+knitr::kable(df_z,format = "html", col.names = c("Number of Outliers"), row.names = TRUE) %>%
+kable_styling(bootstrap_options = c("striped"),
+                full_width = T,
+                font_size = 15) %>% scroll_box(height = "300px")
+```
+
+## 2.2 Data Cleaning Processes
+### 2.2.1 Handling of Missing Data
+
+To fill in the missing data in the additional variables dataset, the r package of MICE. The following code demonstrates how the missing data was imputed using this package. It is highly recommended not to run this code when evaluating this project, as it will require several hours to run.
+
+```{r mice, echo=TRUE, eval=FALSE}
+
+md.pattern(additional_variables)
+
+temp_additional_variables<- mice(additional_variables,m=5,maxit=50,meth='pmm',seed=500)
+
+summary(temp_additional_variables)
+
+```
+
+### 2.2.2 Handling of Outliers
+
+All values that lie outside this range were then identified as outliers. These values were not removed from the dataset due to the fact that these could represent weather data or other data that can occur naturally but infrequently. 
+
+***
+
+# 3. Data Exploration
+## 3.1 Statistical Analysis of the Data
+
+The first step in exploring the data, now that the dataset has been cleaned is a basic statistical analysis. In this analysis, the main information about each feature will be determined. This information includes, the mean, the median, the minimum value, the maximum value, and the values of the first and third quartiles. The table below shows this information for the 98 different power plants. 
+
+```{r statistical_analysis, echo=FALSE, eval=TRUE}
+
+summary_target<-sapply(target_train_data[,-1], summary);
+summary_target_t <- t(summary_target);
+knitr::kable(summary_target_t, format = "markdown", caption = "Summary Table for Power Plant Statistics", format.args = list(decimal.mark = ".", big.mark = ","));
+
+```
+
+
+
+## 3.2 Geographic Map of the Power Plants
+
+Getting a better understanding of where the power plants lie geographically can help in determining how to treat the individual plants in future steps. In the station_info dataset, the longitude and latitude of the individual power plants was supplied. Using the leaflet package, the following is the map that is obtained. 
+
+```{r map, echo=FALSE, eval=TRUE}
+
+m <- leaflet() %>%   #### "%>%" is a pipeline 
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers(lng=station_info$elon, lat=station_info$nlat ,popup=station_info$stid)###(add something maybe avgs)
+m
+
+```
+
+## 3.3 Correlation Analysis of the Variables
+
+Prior to running any model, it is imperative that the features used not be highly correlated amongst themselves. To ensure that this is the case for the available dataset. Given that the main dataset is composed of features that are derived from a principle component analysis, they will not be tested for correlation. The only dataset to undergo this analysis is the additional variables dataset. The following is the heatmap obtained from running this analysis.
+
+```{r correlation, echo = FALSE, eval = TRUE}
+
+cor_completed_data <- round(cor(completedData[,c(3:102)]),2)
+
+# Compute a matrix of correlation p-values
+p.mat <- cor_pmat(completedData[,c(3:102)])
+
+
+my_plot <- ggcorrplot(cor_completed_data, hc.order = TRUE,
+                      type = "lower", p.mat = p.mat, outline.col = "white",
+                      lab = FALSE, title = "Completed Data Correlation Matrix") 
+
+my_plot <- my_plot + theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks = element_blank(),
+        legend.justification = c(1, 0),
+        legend.position = c(0.6, 0.7),
+        legend.direction = "horizontal") +
+  guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
+                               title.position = "top", title.hjust = 0.5))
+
+print(my_plot)
+
+```
+
+Based on these results these features will need to be manipulated prior to being able to use them in the modelling process.
+
+***
+
+# 4. Advanced Exploration and Feature Handling
+## 4.1 Clustering Analysis
+
+To be able to better predict the output of each of the power plants, a general model may be less accurate than a more specific model. In order to limit the number of models to be created, a clustering analysis was conducted to group the different power plants together. The following output shows the optimal number of clusters to be selected based on the silhouette value.To run this clustering analysis, the summary for the power of all the power plants was calculated, then appended to the station_info dataset. Following that the entire dataset was standardized. Following, a trial and error process the best clustering results were obtained when the standardized 1st quartile information,  median, mean, and third quartile information for each of the stations. 
+
+```{r clustering, eval=TRUE, echo=TRUE}
+summary_target<-sapply(target_train_data[,-1], summary)
+target_summary_transposed<-t(summary_target)
+station_info_with_summary<- cbind(station_info,target_summary_transposed)
+station_info_with_summary_standardised <- station_info_with_summary %>% mutate_each_(funs(scale(.) %>% as.vector), 
+                             vars=c(2:10))
+
+fviz_nbclust(station_info_with_summary_standardised[c(6,7,8,9)], kmeans, method='silhouette')
+```
+
+The output states that having 2 clusters is the optimal case for this dataset. The following is the cluster plot for this output.
+
+```{r clustering output, eval = TRUE, echo = FALSE}
+
+
+clustering <- kmeans(station_info_with_summary_standardised[,c(6,7,8,9)], centers = 2, nstart = 25)
+#Add a column (cbind with the cluster for each point)
+station_info_clustered <- cbind(station_info, data.table(cluster = clustering$cluster)); 
+
+clusplot(station_info_with_summary_standardised[,c(6,7,8,9)], clustering$cluster, color=TRUE, shade=TRUE, 
+         labels=0, lines=0, xlab = "", ylab = "", main = "k-means")
+
+```
+
+## 4.2 Priciple Component Analysis
+
+As stated in section 3.3, the highly correlated variables need to be dealt with prior to incorporating them into any model that is to be used. As a result of this, a principle component analysis was conducted on the dataset to overcome this issue. For the PCA, the variance threshold selected was 90%. The following code shows how the PCA was conducted for the additional variables dataset.
+
+```{r pca, eval=FALSE, echo=TRUE}
+completed_data_standardised <- completedData %>% mutate_each_(funs(scale(.) %>% as.vector), 
+                             vars=c(2:101))
+prin_comp <- prcomp(completed_data_standardised[,c(-1)], center = TRUE, scale. = TRUE)
+pca_dat <- prin_comp$x
+pca_dat_2 <- data.table(predict(prin_comp, newdata = completed_data_standardised));
+summary(prin_comp);
+prop_variance_explained <- summary(prin_comp)$importance[3,];
+threshold_variance <- 0.9;
+number_of_variables <- min(which(prop_variance_explained > threshold_variance))
+final_pca_dat <- pca_dat[,1:number_of_variables];
+final_pca_data<- as.data.table(final_pca_dat)
+colnames(final_pca_data)<- 
+colnames(solar_data)
+```
+
+The final number of variables to be used from this dataset is equal to 21 due to the threshold limit that was set. The following are the features selected, and they have been renamed as follows:
+
+```{r pca_2, eval=FALSE, echo=TRUE}
+renamed_PCA<-final_pca_data %>% 
+  rename(
+   PC358 =PC1,
+   PC359 = PC2,
+   PC360 = PC3,
+   PC361 = PC4,
+   PC362 = PC5,
+   PC363 = PC6,
+   PC364 = PC7,
+   PC365 = PC8,
+   PC366 = PC9,
+   PC367 = PC10,
+   PC368 = PC11,
+   PC369 = PC12,
+   PC370 = PC13,
+   PC371 = PC14,
+   PC372 = PC15,
+   PC373 = PC16,
+   PC374 = PC17,
+   PC375 = PC18,
+   PC376 = PC19,
+   PC377 = PC20,
+   PC378 = PC21,
+  )
+
+solar_data_complete<- cbind(solar_data,renamed_PCA)
+
+solar_data_complete$Date<- ymd(solar_data_complete$Date)
+
+```
+
+The final number of variables to be used from this dataset is equal to 21, which will b e combined with the 357 PCA features present in the original dataset for the creation of a model that will predict the power output of each power plant. 
