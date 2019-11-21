@@ -1,0 +1,740 @@
+---
+title: "Data Visualization Group D"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r, echo = FALSE, include = FALSE}
+
+#Install packages & Import Libraries
+
+if(!'ggplot2'%in%installed.packages()){
+  install.packages('ggplot2')}
+if(!'ggthemes'%in%installed.packages()){
+  install.packages('ggthemes')}
+if(!'nlme'%in%installed.packages()){
+  install.packages('nlme')}
+if(!'gapminder'%in%installed.packages()){
+  install.packages('gapminder')}
+if(!'gganimate'%in%installed.packages()){
+  install.packages('gganimate')}
+if(!'ggExtra'%in%installed.packages()){
+  install.packages('ggExtra')}
+if(!'psych'%in%installed.packages()){
+  install.packages('psych')}
+if(!'reshape2'%in%installed.packages()){
+  install.packages('reshape2')}
+if(!'dplyr'%in%installed.packages()){
+  install.packages('dplyr')}
+if(!'nycflights13'%in%installed.packages()){
+  install.packages('nycflights13')}
+if(!'ggcorrplot'%in%installed.packages()){
+  install.packages('ggcorrplot')}
+if(!'waffle'%in%installed.packages()){
+  install.packages('waffle')}
+if(!'tidyr'%in%installed.packages()){
+  install.packages('tidyr')}
+if(!'scales'%in%installed.packages()){
+  install.packages('scales')}
+if(!'ggalt'%in%installed.packages()){
+  install.packages('ggalt')}
+if(!'data.table'%in%installed.packages()){
+  install.packages('data.table')}
+if(!'data.table'%in%installed.packages()){
+  install.packages('data.table')}
+if(!'data.table'%in%installed.packages()){
+  install.packages('data.table')}
+if(!'extrafont'%in%installed.packages()){
+  install.packages('extrafont')}
+if(!'lubridate'%in%installed.packages()){
+  install.packages('lubridate')}
+if(!'DT'%in%installed.packages()){
+  install.packages('DT')}
+if(!'grid'%in%installed.packages()){
+  install.packages('grid')}
+if(!'gridExtra'%in%installed.packages()){
+  install.packages('gridExtra')}
+if(!"prettydoc" %in% installed.packages()) {
+  install.packages("prettydoc")}
+if(!"devtools" %in% installed.packages()) {
+  install.packages("devtools")}
+if(!"tidyverse" %in% installed.packages()) {
+  install.packages("tidyverse")}
+if(!"ggdark" %in% installed.packages()) {
+  install.packages("ggdark")}
+if(!"here" %in% installed.packages()) {
+  install.packages("here")}
+if(!"png" %in% installed.packages()) {
+  install.packages("png")}
+if(!"gifski" %in% installed.packages()) {
+  install.packages("gifski")}
+if(!"data.table" %in% installed.packages()) {
+  install.packages("data.table")}
+if(!"forcats" %in% installed.packages()) {
+  install.packages("forcats")}
+if(!"tufte" %in% installed.packages()) {
+  install.packages("tufte")}
+if(!"colorspace" %in% installed.packages()) {
+  install.packages("colorspace")}
+if(!"viridisLite" %in% installed.packages()) {
+  install.packages("viridisLite")}
+if(!"formatR" %in% installed.packages()) {
+  install.packages("formatR")}
+if(!"DiagrammeR" %in% installed.packages()) {
+  install.packages("DiagrammeR")}
+if(!"xaringan" %in% installed.packages()) {
+  install.packages("xaringan")}
+if(!"ggridges" %in% installed.packages()) {
+  install.packages("ggridges")}
+if(!"GGally" %in% installed.packages()) {
+  install.packages("GGally")}
+if(!"kableExtra" %in% installed.packages()) {
+  install.packages("RColorBrewer")}
+
+# Connect with the libaries
+library(ggplot2)
+library(ggthemes)
+library(nlme)
+library(gganimate)
+library(gapminder)
+library(ggExtra)
+library(psych)
+library(reshape2)
+library(dplyr)
+library(nycflights13)
+library(ggcorrplot)
+library(waffle)
+library(tidyr)
+library(scales)
+library(ggalt)
+library(data.table)
+library(extrafont)
+library(lubridate)
+library(DT)
+library(grid)
+library(gridExtra)
+library(prettydoc)
+library(devtools)
+library(tidyverse)
+library(ggdark)
+library(here)
+library(png)
+library(gifski)
+library(forcats)
+library(tufte)
+library(colorspace)
+library(viridisLite)
+# library(Zelig)
+library(formatR)
+library(DiagrammeR)
+library(xaringan)
+library(ggridges)
+library(GGally)
+library(xlsx)
+library(scales)
+library(RColorBrewer)
+
+
+```
+
+
+
+```{r, echo = FALSE, include = FALSE}
+
+#Defining the general colors to avoid hard coding  
+fill_color = 'white'
+decoration_color = '#778287'
+main1_color = '#396ac4'
+main2_color = '#79d6f2'
+
+#Creare a theme we can apply everywhere 
+
+groupD_theme<-theme_bw() + theme(
+  panel.grid.major = element_blank(), 
+  panel.grid.minor = element_blank(),
+  plot.title = element_text(size = 10, hjust = 0.2, color = decoration_color),
+  axis.title = element_text(size = 5, hjust = 0.5, color = decoration_color),
+  axis.text = element_text(colour = decoration_color, size = 8),
+  axis.ticks = element_blank(),
+  axis.line = element_line(colour = decoration_color, size=0.3, linetype = "dashed"), 
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  strip.text = element_text(size = 12, color = decoration_color),
+  panel.background = element_blank(),
+  strip.background =element_blank(),
+  plot.background = element_blank(),
+  legend.position="None"
+)
+
+#Now we set the new defined theme to the default option 
+theme_set(groupD_theme)
+
+#Creare a theme that includes a legend 
+groupD_theme2<-theme_bw() + theme(
+  panel.grid.major = element_blank(), 
+  panel.grid.minor = element_blank(),
+  plot.title = element_text(size = 10, hjust = 0.2, color = decoration_color),
+  axis.title = element_text(size = 5, hjust = 0.5, color = decoration_color),
+  axis.text = element_text(colour = decoration_color, size = 8),
+  axis.ticks = element_blank(),
+  axis.line = element_line(colour = decoration_color, size=0.3, linetype = "dashed"), 
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  strip.text = element_text(size = 12, color = decoration_color),
+  panel.background = element_blank(),
+  strip.background =element_blank(),
+  plot.background = element_blank(),
+  legend.text	= element_text(size = 10, hjust = 0.5, color = decoration_color), 
+  
+  legend.position = "left",
+  legend.key = element_blank(),
+  legend.title = element_blank()
+)
+
+theme_set(groupD_theme2)
+
+```
+
+
+##### Our group chose to visualize data on Youth Unemployment in Latin America & The Caribbean. This dataset contains statistics on employment by industry, country, gender and service type. 
+
+
+##### **Our visual encoding is centered around the question: What are the key characteristics of Youth Unemployment in Latin America?**
+
+##### To understand the problem, let us carry out some exploratory analysis.
+
+
+```{r dataset_view, echo = FALSE}
+
+# JD Path: path_data <- "/Users/juandavidbotero/Desktop/Data Visualization/Youth_Latam.csv"
+# AS Path: 
+path_data <- "/Users/juandavidbotero/Desktop/Data Visualization/Youth_Latam.csv"
+#path_data <- "Youth_Latam.csv"
+
+youth_latam <- data.table(read.csv(path_data, header = T))
+colnames(youth_latam) <- c("Country", colnames(youth_latam[,2:length(youth_latam)]))
+
+#We remove all rows with NA's
+
+youth_latam <- na.omit(youth_latam)
+
+```
+
+
+
+
+## BASIC PLOTTING
+
+
+### UNEMPLOYMENT RATES BY COUNTRY
+
+
+##### Let us find out Unemployment Rates in the countries for which there is sufficient data.
+
+
+```{r unemployment_rates, echo = FALSE, fig.align="center"}
+
+
+###################################################### UNEMPLOYMENT RATES ####################################################
+
+################# A PLOT OF THE UNEMPLOYMENT RATES BY COUNTRY ###########################
+
+############################# Unemployment_Rate_Calculations
+
+
+### Steps to create the Unemployed_Youth dataset:
+    ### Sum the Economically Active Population by country
+    ### Sum the Unemployed population country
+    ### Division of the two gives us the Unemployment Rate
+
+Unemployed_Youth <- youth_latam[,list(Economically_Active = sum(Economically.Active.Population), 
+                                      Unemployed_Population = sum(Unemployed)), by = "Country"][
+                                        , list(Unemployment_Rate = (Unemployed_Population / Economically_Active)*100),
+                                        by = "Country"]
+
+Unemployed_Youth <-Unemployed_Youth[order(Unemployed_Youth$Unemployment_Rate), ]  # sort the dataset by the employment rate
+
+
+Unemployed_Youth$Country <- factor(Unemployed_Youth$Country, levels = Unemployed_Youth$Country) #to keep the factor order as the unemployment
+
+
+
+############################# Graphing Unemployment_Rates
+
+theme_set(groupD_theme) # set theme
+
+
+Unemployment_Lollipop <- ggplot(Unemployed_Youth, aes(x=Country, y=Unemployment_Rate)) + 
+  geom_point(col= main1_color, 
+             size= 3, 
+             shape = 19) +   # Draw points
+  geom_segment(aes(x=Country, 
+                   xend=Country, 
+                   y=0, 
+                   yend=Unemployment_Rate), 
+               color = main2_color,
+               linetype = 'dotted') + # Draw dashed line
+  labs(x = NULL, y= NULL, subtitle = "Unemployment Rates (%)") +
+    theme(axis.text.x = element_text(angle=65, vjust= 0.4))
+
+
+Unemployment_Lollipop
+
+```
+
+##### A lolipop chart helps us visualize the unemployement rate by country. Doing this, the focus is more in the rates, and the rankings of the country rather than the countries themselves. We can see that Brazil has the highest youth unemployment rates in Latin America while Guatemala has the lowest. 
+
+
+### TUFTE PLOT 
+
+
+##### After the exploratory analysis we continue with the tufte chart. Since there are limited data points, we have decided to use a boxplot to show the distribution of the employement by position in LATAM. We compare the countries that have above average unemployment rates against those that have below average unemployment rates. 
+
+
+```{r tufte_plot, echo = FALSE, fig.width=10, fig.height=5}
+
+############################################## TUFTE PLOT ######################################
+
+################# A PLOT OF THE NUMBER OF PEOPLE IN EACH POSITION IN THE TWO HALFS (MEDIAN AND SPREAD) ###########################
+
+############################# Subsetting the main dataset for those countries that are above the average Unemployment Rate and those
+############################# that are below
+
+top_unemployed <- youth_latam[Country %in% (Unemployed_Youth[Unemployed_Youth$Unemployment_Rate >= mean(Unemployed_Youth$Unemployment_Rate)]$Country)]
+
+
+bottom_unemployed <- youth_latam[Country %in% (Unemployed_Youth[Unemployed_Youth$Unemployment_Rate < mean(Unemployed_Youth$Unemployment_Rate)]$Country)]
+
+
+############################# Tufte Plot for the bottom half
+
+
+### Steps to create the Bottom_Type dataset:
+    ###  Subset the main bottom_unemployed dataset for only the required columns (position)
+    ###  Sum the positions, also putting them as ccolumns and group by coutntry
+
+Bottom_Type <- bottom_unemployed[,bottom_unemployed[,c(1,22:28)]][,list(Type = colnames(.SD), Employed = sapply(.SD, sum)),
+                                                         by = "Country"]
+
+
+### Graph representing the number of people employed by Position
+
+theme_set(groupD_theme2)
+
+Bottom_Positions_Graph <- ggplot(Bottom_Type, aes(Type, Employed / 1000)) +
+geom_tufteboxplot(size = 1, whisker.type = 'line', color = main1_color) + 
+      theme(axis.text.x = element_text(angle=65, vjust=0.6)) + 
+      labs(subtitle = "Bottom Half Employment Industry", x = NULL, y  = NULL)
+
+
+
+############################# Tufte Plot for the Top half
+
+
+### Steps to create the Top_Type dataset same as for the bottom type
+
+Top_Type <- top_unemployed[,top_unemployed[,c(1,22:28)]][,list(Type = colnames(.SD), Employed = sapply(.SD, sum)), by = "Country"]
+
+                                                         
+### Graph representing the number of people employed by Position                                                      
+                                                                                                            
+theme_set(groupD_theme2)
+
+Top_Positions_Graph <- ggplot(Top_Type, aes(Type, Employed / 1000)) +
+geom_tufteboxplot(size = 1, whisker.type = 'line', color = main1_color) + 
+      theme(axis.text.x = element_text(angle=65, vjust=0.6)) + 
+      labs(subtitle = "Top Half Employment Industry", x = NULL, y  = NULL)
+
+
+
+grid.arrange(Bottom_Positions_Graph, Top_Positions_Graph, ncol = 2, padding = 0.5)
+
+
+```
+
+
+##### A quick look at both plot reveals that there are some differences. In the countries with higher than average unemployment rates, the public sector (Armed Forces, Services etc) employs more of the workforce. On the other hand, employment in these sectors are lower in countries with lower that average unemployment. This is perhaps because the government has to employ a significant amount of people to support lower unemployment rates. 
+
+
+### POPULATION PYRAMID
+
+##### We see that there are sectoral differences in employment, which brings the question, is there an underlying difference in gender too? In order to find out, we decided to visualize the proportion of men and women employed in each industry through a population pyramid.  
+
+
+```{r  population_plot, echo = FALSE, fig.width=10, fig.height=5}
+
+############################################################ POPULATION PLOT ##############################
+
+################# A PLOT OF THE PROPORTION OF MEN AND WOMEN IN EACH POSITON OF THE BOTTOM AND TOP HALFS ###########################
+
+
+############################# Reinitialise the top and bottom halfs of the main dataset
+
+top_unemployed <- youth_latam[Country %in% (Unemployed_Youth[Unemployed_Youth$Unemployment_Rate >= mean(Unemployed_Youth$Unemployment_Rate)]$Country)]
+
+
+bottom_unemployed <- youth_latam[Country %in% (Unemployed_Youth[Unemployed_Youth$Unemployment_Rate < mean(Unemployed_Youth$Unemployment_Rate)]$Country)]
+
+
+############################# Bottom_Type_Pr dataset
+
+theme_set(groupD_theme2)
+
+### Steps to create the Bottom_Type_Pr dataset:
+    ###  Subset the main bottom_unemployed dataset for only the required columns (position)
+    ###  Sum the positions, also putting them as ccolumns, divide by the sum of the total positions and group by gender 
+
+
+Bottom_Type_Pr <- bottom_unemployed[,bottom_unemployed[,c(2,30,22:28)]][,list(Type = colnames(.SD), 
+                                                                          Employed_Proportion = (sapply(.SD, sum)/ sum(Total.Employment.Type)
+                                                                                                 *100)),by = c("Demographic")]
+
+Bottom_Type_Pr <- Bottom_Type_Pr[Bottom_Type_Pr[,Bottom_Type_Pr$Type != "Total.Employment.Type"],]  #remove the total (100%) 
+
+
+############################# Bottom_Type_Pr Plot
+
+
+### Steps to create the Bottom_Type_Pr plot:
+    ###  Prepare the Men column as -ve to be able to do a population plot 
+    ### Set breaks and labels
+    ### Plot
+
+
+Bottom_Type_Pr[Bottom_Type_Pr$Demographic == "Men",][,"Employed_Proportion"] <- Bottom_Type_Pr[Bottom_Type_Pr$Demographic ==
+                                                                                                     "Men",][,"Employed_Proportion"]*-1
+
+brks <- seq(-50, 50, 5)
+lbls <- paste0(as.character(c(seq(50, 0, -5), seq(5, 50, 5))))
+
+Bottom_Unemployed_Youth_Graph <- ggplot(Bottom_Type_Pr, aes(x = Type, y = Employed_Proportion, fill = Demographic)) +   # Fill column
+ geom_bar(stat = "identity", width = .6) +   # draw the bars
+ scale_y_continuous(breaks = brks,   # Breaks
+                    labels = lbls) + # Labels
+ coord_flip() +  # Flip axes  
+ scale_fill_brewer(palette = "Paired") +
+  labs (subtitle = "Bottom Population Proportion (%)", x =  NULL, y = NULL)
+
+
+
+############################# Top_Type_Pr plot
+
+
+### Steps to create the Top_Type_Pr plot same as bottom_type_pr
+
+
+
+Top_Type_Pr <- top_unemployed[,top_unemployed[,c(2,30,22:28)]][,list(Type = colnames(.SD), 
+                                                                          Employed_Proportion = (sapply(.SD, sum)/ sum(Total.Employment.Type)
+                                                                                                 *100)), by = c("Demographic")]
+
+
+Top_Type_Pr <- Top_Type_Pr[Top_Type_Pr[,Top_Type_Pr$Type != "Total.Employment.Type"],] # remove 100% row
+
+
+############################# Top_Type_Pr Plot
+
+
+### Steps to create the Top_Type_Pr plot same as for the Bottom_Type_Pr plot
+
+
+
+Top_Type_Pr[Top_Type_Pr$Demographic == "Men",][,"Employed_Proportion"] <- Top_Type_Pr[Top_Type_Pr$Demographic ==
+                                                                                                     "Men",][,"Employed_Proportion"]*-1
+
+brks <- seq(-50, 50, 5)
+lbls <- paste0(as.character(c(seq(50, 0, -5), seq(5, 50, 5))))
+
+
+Top_Unemployed_Youth_Graph <- ggplot(Top_Type_Pr, aes(x = Type, y = Employed_Proportion, fill = Demographic)) +   # Fill column
+ geom_bar(stat = "identity", width = .6) +   # draw the bars
+ scale_y_continuous(breaks = brks,   # Breaks
+                    labels = lbls) + # Labels
+ coord_flip() +  # Flip axes
+ scale_fill_brewer(palette = "Paired")+
+  labs (subtitle = "Top Population Propotion (%)", x=NULL, y=NULL)+
+  theme(legend.position = "none")
+
+
+############################## Print 
+
+grid.arrange(Bottom_Unemployed_Youth_Graph, Top_Unemployed_Youth_Graph, ncol = 2)
+
+
+```
+
+##### The population pyramid reveals some interesting facts. For example, in countries with below average unemployment rates, women seem to be employed in a higher proportion in the Non Agricultural and Merchant sectors. Men seem to be employed more in the Agricultural sectors in both groups.
+
+
+##### The visualization shows that there are highlightable differences also within the groups. In the group with below average employment, women are almost unrepresented in the Armed Forces. 
+
+
+## ADVANCED PLOTTING
+
+
+### DUMBELL PLOT
+
+
+##### Since the dumbbell plot is great for displaying differences between two groups, knowing that there is a difference in sectors between genders, we decided to also check if there was a difference in unemployment rates by gender.
+
+
+```{r dumbell_plot, echo = FALSE, fig.width=10, fig.height=5}
+
+####################################################### DUMBELL PLOT ###########################################
+
+
+################# DISPERTION OF EMPLOYMENT RATE AMONGST MEN AND WOMEN ###########################
+
+
+############################# Reinitialize the top and bottom half
+
+top_unemployed <- youth_latam[Country %in% (Unemployed_Youth[Unemployed_Youth$Unemployment_Rate >= mean(Unemployed_Youth$Unemployment_Rate)]$Country)]
+
+
+bottom_unemployed <- youth_latam[Country %in% (Unemployed_Youth[Unemployed_Youth$Unemployment_Rate < mean(Unemployed_Youth$Unemployment_Rate)]$Country)]
+
+
+############################# Bottom_Unemployed_Youth 
+
+### Steps to create the Bottom_Unemployed_Youth dataset are the same as that for Unemployment_Rates
+
+Bottom_Unemployed_Youth <- bottom_unemployed[,list(Demographic, Economically_Active = sum(Economically.Active.Population),
+                                      Unemployed_Population = sum(Unemployed)), by = c("Country","Demographic")][
+                                        ,list(Demographic, Unemployment_Rate = Unemployed_Population / Economically_Active),
+                                        by = c("Country","Demographic")][,list(Country, Demographic , Unemployment_Rate = (Unemployment_Rate *
+                                                                                                                             100))]
+
+### Additional Steps:
+    ### Filter the Bottom_Unemployed_Youth Dataset for the men and women, separate them into datasets
+    ### Merge the newly created dataset to have a single one that can be used for plotting  
+    ### Change the Column Names for easy subsetting
+    ### Sort the values in descending order and factor the categorical variables to keep the order
+
+Bottom_Unemployed_Youth_Men <- Bottom_Unemployed_Youth[Bottom_Unemployed_Youth$Demographic == "Men", c("Country","Unemployment_Rate")]
+Bottom_Unemployed_Youth_Women <- Bottom_Unemployed_Youth[Bottom_Unemployed_Youth$Demographic == "Women", c("Country","Unemployment_Rate")]
+
+
+Bottom_Unemployed_Youth_Gender <- merge(Bottom_Unemployed_Youth_Men, Bottom_Unemployed_Youth_Women, by ="Country")
+colnames(Bottom_Unemployed_Youth_Gender)  <- c("Country","Unemployment_Rate_Men", "Unemployment_Rate_Women")
+
+
+Bottom_Unemployed_Youth_Gender <- Bottom_Unemployed_Youth_Gender[order(Bottom_Unemployed_Youth_Gender$Unemployment_Rate_Women), ]  # sort
+Bottom_Unemployed_Youth_Gender$Country <- factor(Bottom_Unemployed_Youth_Gender$Country, levels = Bottom_Unemployed_Youth_Gender$Country)
+
+
+### Steps to create the Bottom_Gender_Plot plot:
+    ###  Create Dumbell plot that highlights the gender difference
+
+Bottom_Gender_Plot <- ggplot(Bottom_Unemployed_Youth_Gender, aes(x=Unemployment_Rate_Men, xend=Unemployment_Rate_Women, y=Country)) + 
+        geom_dumbbell(colour_xend = main1_color,
+                      colour_x = main2_color,
+                      size= 1,
+                      color = main2_color) + 
+        scale_x_continuous() +
+  labs(x=NULL, 
+     y=NULL, 
+     subtitle="Bottom Half Unemployment Rates (%)")
+
+
+############################# Top_Unemployed_Youth 
+
+
+### Steps to create the Top_Gender_Plot are the same as the one for the Bottom Gender Plot
+
+
+Top_Unemployed_Youth <- top_unemployed[,list(Demographic, Economically_Active = sum(Economically.Active.Population),
+                                      Unemployed_Population = sum(Unemployed)), by = c("Country","Demographic")][
+                                        ,list(Demographic, Unemployment_Rate = Unemployed_Population / Economically_Active),
+                                        by = c("Country","Demographic")][,list(Country, Demographic , Unemployment_Rate = (Unemployment_Rate * 100))]
+
+
+
+### Additional Steps
+
+
+Top_Unemployed_Youth_Men <- Top_Unemployed_Youth[Top_Unemployed_Youth$Demographic == "Men", c("Country","Unemployment_Rate")]
+Top_Unemployed_Youth_Women <- Top_Unemployed_Youth[Top_Unemployed_Youth$Demographic == "Women", c("Country","Unemployment_Rate")]
+
+
+Top_Unemployed_Youth_Gender <- merge(Top_Unemployed_Youth_Men, Top_Unemployed_Youth_Women, by ="Country")
+colnames(Top_Unemployed_Youth_Gender)  <- c("Country","Unemployment_Rate_Men", "Unemployment_Rate_Women")
+
+Top_Unemployed_Youth_Gender <- Top_Unemployed_Youth_Gender[order(Top_Unemployed_Youth_Gender$Unemployment_Rate_Women), ]  # sort
+Top_Unemployed_Youth_Gender$Country <- factor(Top_Unemployed_Youth_Gender$Country, levels = Top_Unemployed_Youth_Gender$Country)
+
+
+
+### Plotting
+
+
+
+Top_Gender_Plot <- ggplot(Top_Unemployed_Youth_Gender, aes(x=Unemployment_Rate_Men, xend=Unemployment_Rate_Women, y=Country)) + 
+        geom_dumbbell(colour_xend = main1_color,
+                      colour_x = main2_color,
+                      size = 1,
+                      colour = main2_color) + 
+        scale_x_continuous() +
+  labs(x=NULL, 
+     y=NULL, 
+     subtitle="Top Half Unemployment Rates (%)")
+    
+
+####
+
+grid.arrange(Bottom_Gender_Plot,Top_Gender_Plot, ncol = 2)
+
+
+```
+
+
+##### As the plot indicates, the Dominican Republic has the highest difference between men and women unemployment rates. What's interesting to note is that there is a larger gap between male and female employment in countries that have above average unemployment than there is in the group that has below average unemployment. 
+
+
+##### It is also interesting to note that Mexico and Peru show the oposite tendency compared to the countries being anlaysed as in these both countries, the female umeployement rate is lower than that for males.
+
+
+### WAFFLE CHART
+
+
+##### As a final hypothesis before coming to a conclusion, we decided to visualize, in a waffle chart, the employment by industry for the above and below average groups segmented by gender.
+
+
+```{r waffle_chart, echo = FALSE, fig.width=10, fig.height=5 }
+############################### WAFFLE CHART  ################################# 
+
+
+# Sort by industries in TOP and BOTTOM
+
+top_by_industries <- top_unemployed[,list(Industries = colnames(top_unemployed[,11:19]), 
+                                       Total_Employed = sapply(top_unemployed[,11:19], sum), 
+                                       Total_Industry = sum(Total.Industry))][,
+                                      list(Proportion_Employed_By_Industry = round((Total_Employed / Total_Industry *100))),
+                                      by = "Industries"]
+  
+
+bottom_by_industries <- bottom_unemployed[,list(Industries = colnames(bottom_unemployed[,11:19]), 
+                                       Total_Employed = sapply(bottom_unemployed[,11:19], sum), 
+                                       Total_Industry = sum(Total.Industry))][,
+                                      list(Proportion_Employed_By_Industry = round((Total_Employed / Total_Industry *100))),
+                                      by = "Industries"]
+
+
+# Sort by industries and by gender
+
+#TOP
+
+women_top <- top_unemployed[top_unemployed$Demographic == "Women"]
+
+top_by_industries_Women <- women_top[,list(Industries = colnames(women_top[,11:19]), 
+                                       Total_Employed = sapply(women_top[,11:19], sum), 
+                                       Total_Industry = sum(Total.Industry))][,
+                                      list(Proportion_Employed_By_Industry = ceiling((Total_Employed / Total_Industry *100))),
+                                      by = "Industries"]
+
+men_top <- top_unemployed[top_unemployed$Demographic == "Men"]
+
+top_by_industries_Men <- men_top[,list(Industries = colnames(men_top[,11:19]), 
+                                       Total_Employed = sapply(men_top[,11:19], sum), 
+                                       Total_Industry = sum(Total.Industry))][,
+                                      list(Proportion_Employed_By_Industry = ceiling((Total_Employed / Total_Industry *100))),
+                                      by = "Industries"]
+
+#BOTTOM 
+
+women_bottom <- bottom_unemployed[bottom_unemployed$Demographic == "Women"]
+
+bottom_by_industries_Women <- women_bottom[,list(Industries = colnames(women_bottom[,11:19]), 
+                                       Total_Employed = sapply(women_bottom[,11:19], sum), 
+                                       Total_Industry = sum(Total.Industry))][,
+                                      list(Proportion_Employed_By_Industry = ceiling((Total_Employed / Total_Industry *100))),
+                                      by = "Industries"]
+
+
+men_bottom <- bottom_unemployed[bottom_unemployed$Demographic == "Men"]
+
+bottom_by_industries_Men <- men_bottom[,list(Industries = colnames(men_bottom[,11:19]), 
+                                       Total_Employed = sapply(men_bottom[,11:19], sum), 
+                                       Total_Industry = sum(Total.Industry))][,
+                                      list(Proportion_Employed_By_Industry = ceiling((Total_Employed / Total_Industry *100))),
+                                      by = "Industries"]
+
+
+# Turning each data table to named vectos
+
+
+vector_top_by_industries_Women <- top_by_industries_Women$Proportion_Employed_By_Industry
+names(vector_top_by_industries_Women) <- top_by_industries_Women$Industries
+
+vector_top_by_industries_Men <- top_by_industries_Men$Proportion_Employed_By_Industry
+names(vector_top_by_industries_Men) <- top_by_industries_Men$Industries
+
+
+vector_bottom_by_industries_Women <- bottom_by_industries_Women$Proportion_Employed_By_Industry
+names(vector_bottom_by_industries_Women) <- bottom_by_industries_Women$Industries
+
+vector_bottom_by_industries_Men <- bottom_by_industries_Men$Proportion_Employed_By_Industry
+names(vector_bottom_by_industries_Men) <- bottom_by_industries_Men$Industries
+
+
+
+# Waffle Chart
+
+waffle_top_industries_gender <- iron(
+  
+  waffle(
+    vector_top_by_industries_Women, rows = 5, size = 0.3,
+    colors = brewer.pal(n = 9, name = 'RdBu'),
+    keep = FALSE,
+    title = "Top Half Women Industry Participation", 
+    legend='none'),
+  
+  waffle(
+    vector_top_by_industries_Men, rows = 5, size = 0.3,
+    colors = brewer.pal(n = 9, name = 'RdBu'),
+    keep = FALSE,
+    title = "Top Half Men Industry Participation",
+    xlab = "1 sq == 1%",
+    legend_pos = "bottom"))
+
+waffle_bottom_industries_gender <-iron(
+  
+   waffle(
+    vector_bottom_by_industries_Women, rows = 5, size = 0.3,
+    colors = brewer.pal(n = 9, name = 'RdBu'),
+    keep = FALSE,
+    title = "Bottom Half Women Industry Participation",
+    legend='none'),
+  
+  waffle(
+    vector_bottom_by_industries_Men, rows = 5, size = 0.3,
+    colors = brewer.pal(n = 9, name = 'RdBu'),
+    keep = FALSE,
+    title = "Bottom Half Men Industry Participation",
+    xlab = "1 sq == 1%",
+    legend_pos = "bottom")
+  
+)
+
+
+```
+
+
+##### The Waffle chart confirms the conlusions from the population pyramids (which looked at the positions rather than industries): Women are more inclined to be employed by social services while men are more employed in the agriculture industry, regardless of whether they are in the top half or the bottom half of unemployment rates. 
+
+##### In addition, in the hospitality sector, the top half has more employment in general. However, between men and women, the difference is larger for the hospitality sector in countries in the the bottom half of unemployment rates. 
+
+
+### CONCLUSION
+
+##### The visualizations show a clear there difference in employment not only amongst countries, which is quite intuitive but also in terms of gender, industry and type of employment. 
+
+##### What are the characteristics? 
+
+##### a) Higher unemployment rates amongst women than men, a problem that is more persistent in countries in the bottom half of the group that in the top half. 
+
+##### b) There is support from the public sector in the top half, which employs a larger proportion of the population. 
+
+##### c) Employment in the bottom half is highly reliant on Agriculture while Services support the top half. 
+
