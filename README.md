@@ -1,14 +1,6 @@
 # IE_MBD_2019
 
-This repository contains the projects carried out during my masters degree, categorized by type of project:
-
-Kaggle: 
-Python and R codes for Kaggle and other Data Science Competitions.
-
-City Bikes Demand (2nd place): Forecasting bike sharing demand RMSLE 0.22794.
-House Prices (10th place): Advanced Regression Techniques competition. Final score of 0.12788.
-Pump it Pump: Advanced Modelling (Random Forest) for the Pump it up challenge on Driven Data. Final score of 0.79.
-
+This repository contains the projects carried out during my masters degree, categorized by type of project.
 
 Chatbot :
 Using IBM Watson, we developed a chatbot to aid gender violence victims. Looking to use technology for social good.
@@ -35,6 +27,13 @@ Hadoop:
 
 a) The first one are queries written on Hive to extract and analyze data from tweets (using Twitter API).
 b) The second was a report on how Map reduce could be used to extract twitter data.
+
+Kaggle: 
+Python and R codes for Kaggle and other Data Science Competitions.
+
+City Bikes Demand (2nd place): Forecasting bike sharing demand RMSLE 0.22794.
+House Prices (10th place): Advanced Regression Techniques competition. Final score of 0.12788.
+Pump it Pump: Advanced Modelling (Random Forest) for the Pump it up challenge on Driven Data. Final score of 0.79.
 
 Machine Learning: 
 Contains three sections:
