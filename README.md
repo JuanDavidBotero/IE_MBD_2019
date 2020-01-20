@@ -18,8 +18,8 @@ d) Chicago crime report using Carto.
 
 Two models (star-schema)
 
-a) The first one (ERD-Cinema-Group C) was a model designed for a cinema company and
-b) the second (Offshore_Windfarm) a model designed to analyse a offshore windfarm production performance (used in ETL and Data Visualization)
+- a) The first one (ERD-Cinema-Group C) was a model designed for a cinema company and
+- b) the second (Offshore_Windfarm) a model designed to analyse a offshore windfarm production performance (used in ETL and Data Visualization)
 
 ## ETL: 
 
