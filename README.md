@@ -50,11 +50,14 @@ Linear Regression: A report on a regression project carried out in Dataiku.
 
 Contains three sections:
 
-### R: A series of R codes that were used to a) predict solar production (Kaggle Dataset) and b) Create an R-Markdown and Shiny.
+### R: 
+A series of R codes that were used to a) predict solar production (Kaggle Dataset) and b) Create an R-Markdown and Shiny.
 
-### SQL: A series of SQL queries that were written to extract data for a Cinema company and answer some pre-defined questions.
+### SQL: 
+A series of SQL queries that were written to extract data for a Cinema company and answer some pre-defined questions.
 
-### Python: A series of Python codes that a) provide solutions for the first 10 Euler problems and b) Caryy out EDA on the Titanic Dataset and c) Predict Bike Sharing usage in a city.
+### Python: 
+A series of Python codes that a) provide solutions for the first 10 Euler problems and b) Caryy out EDA on the Titanic Dataset and c) Predict Bike Sharing usage in a city.
 
 ## Spark: 
 
