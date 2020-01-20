@@ -1,4 +1,4 @@
-# IE_MBD_2019
+# IE Master’s in Business Analytics & Big Data 2019
 
 This repository contains the projects carried out during my masters degree, categorized by type of project.
 
